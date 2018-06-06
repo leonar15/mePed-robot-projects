@@ -95,9 +95,9 @@ Servo myServo7; // Front Right Pivot Servo
 Servo myServo8; // Front Right Lift Servo
 
 // Set up IR Sensor
-int irReceiver = 12;       // Use pin D12 for IR Sensor
-IRrecv irrecv(irReceiver); // create a new instance of the IR Receiver
-decode_results results;
+int irReceiverPin = 12;           // Use pin D12 for IR Sensor
+IRrecv irReceiver(irReceiverPin); // create a new instance of the IR Receiver
+decode_results irResponse;        // decoded IR signal
 
 //==========================================================================================
 
@@ -123,7 +123,7 @@ void setup()
   pinMode(echoPin, INPUT);
 
   // Enable the IR receiver
-  irrecv.enableIRIn();
+  irReceiver.enableIRIn();
 
   // Center all servos
   center_servos();
@@ -144,9 +144,9 @@ void loop()
 
   while (1 == 1)    // Loop forever
   {
-    if (irrecv.decode(&results)) // If we have received an IR signal
+    if (irReceiver.decode(&irResponse)) // If we have received an IR signal
     {
-      value = results.value;
+      value = irResponse.value;
 
       if (value == irRepeat)
         value = lastValue;
@@ -237,7 +237,7 @@ void loop()
           break;
       }
 
-      irrecv.resume(); //next value
+      irReceiver.resume(); //next value
       delay(50);  // Pause for 50ms before executing next movement
 
     }// if irrecv.decode
