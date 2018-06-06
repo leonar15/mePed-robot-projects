@@ -105,6 +105,9 @@ decode_results results;
 
 void setup()
 {
+  // Enable serial comms for debugging
+  Serial.begin(9600);
+
   // Attach servos to Arduino Pins
   myServo1.attach(2);
   myServo2.attach(3);
@@ -115,13 +118,16 @@ void setup()
   myServo7.attach(8);
   myServo8.attach(9);
 
+  // Set USRF pins
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 
-  irrecv.enableIRIn(); //start the receiver
+  // Enable the IR receiver
+  irrecv.enableIRIn();
 
-  Serial.begin (9600);
-
+  // Center all servos
+  center_servos();
+  
 }//setup
 
 //==========================================================================================
@@ -132,8 +138,6 @@ void loop()
 {
   unsigned long value;
   unsigned long lastValue;
-  
-  center_servos();  // Center all servos
 
   high = 15;        // Set height to 15
   spd = 3;          // Set speed to 3
