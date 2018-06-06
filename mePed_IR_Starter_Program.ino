@@ -20,26 +20,6 @@
 #define INCH 0
 #define CM 1
 
-// Define IR Remote Button Codes
-#define irUp  16736925
-#define irDown 16754775
-#define irRight 16761405
-#define irLeft 16720605
-#define irOK 16712445
-#define ir1 16738455
-#define ir2 16750695
-#define ir3 16756815
-#define ir4 16724175
-#define ir5 16718055
-#define ir6 16743045
-#define ir7 16716015
-#define ir8 16726215
-#define ir9 16734885
-#define ir0 16730805
-#define irStar 16728765
-#define irPound 16732845
-#define irRepeat 4294967295
-
 // calibration
 int da =  -12,  // Left Front Pivot
     db =   10,  // Left Back Pivot
@@ -99,6 +79,9 @@ int irReceiverPin = 12;           // Use pin D12 for IR Sensor
 IRrecv irReceiver(irReceiverPin); // create a new instance of the IR Receiver
 decode_results irResponse;        // decoded IR signal
 
+// Define remote control keys
+enum RemoteKey {NONE,REPEATED,LEFT,RIGHT,UP,DOWN,OK,N0,N1,N2,N3,N4,N5,N6,N7,N8,N9,STAR,POUND};
+
 //==========================================================================================
 
 //===== Setup ==============================================================================
@@ -138,98 +121,96 @@ void loop()
 {
   unsigned long value;
   unsigned long lastValue;
+  RemoteKey thisKey = NONE;
+  RemoteKey lastKey = NONE;
 
   high = 15;        // Set height to 15
   spd = 3;          // Set speed to 3
 
   while (1 == 1)    // Loop forever
   {
-    if (irReceiver.decode(&irResponse)) // If we have received an IR signal
+    thisKey = get_keypress();
+
+    // Have we received a new command?
+    
+
+    if (thisKey == NONE)
     {
-      value = irResponse.value;
-
-      if (value == irRepeat)
-        value = lastValue;
-
-      switch (value)
-      {
-        case irUp:
-          lastValue = irUp;
+      // skip rest of the loop
+      continue;
+    } 
+    else if (thisKey == REPEATED)
+    {
+      thisKey = lastKey;
+    }
+    
+    switch (thisKey)
+    {
+        case UP:
           forward();
           break;
 
-        case irDown:
-          lastValue = irDown;
+        case DOWN:
           back();
           break;
 
-        case irRight:
-          lastValue = irRight;
+        case RIGHT:
           turn_right();
           break;
 
-        case irLeft:
-          lastValue = irLeft;
+        case LEFT:
           turn_left();
           break;
 
-        case irOK:
-          lastValue = irOK;
+        case OK:
+          // unassigned
           break;
 
-        case ir1:
-          lastValue = ir1;
+        case N1:
           bow();
           break;
 
-        case ir2:
-          lastValue = ir2;
+        case N2:
           wave();
           break;
 
-        case ir3:
-          lastValue = ir3;
+        case N3:
           increase_speed();
           break;
 
-        case ir4:
-          lastValue = ir4;
+        case N4:
+          // unassigned
           break;
 
-        case ir5:
-          lastValue = ir5;
+        case N5:
+          // unassigned
           break;
 
-        case ir6:
-          lastValue = ir6;
+        case N6:
           decrease_speed();
           break;
 
-        case ir7:
-          lastValue = ir7;
+        case N7:
+          // unassigned
           break;
 
-        case ir8:
-          lastValue = ir8;
+        case N8:
           dance();
           break;
 
-        case ir9:
-          lastValue = ir9;
+        case N9:
+          // unassigned
           break;
 
-        case ir0:
-          lastValue = ir0;
+        case N0:
           center_servos();
           break;
 
-        case irStar:
-          lastValue = irStar;
+        case STAR:
           trim_left();
           break;
 
-        case irPound:
-          lastValue = irPound;
+        case POUND:
           trim_right();
           break;
 
@@ -237,10 +218,11 @@ void loop()
           break;
       }
 
-      irReceiver.resume(); //next value
+      // store this command in case we need to repeat
+      lastKey = thisKey;
+
       delay(50);  // Pause for 50ms before executing next movement
 
-    }// if irrecv.decode
   }//while
 
 }//loop
@@ -269,6 +251,71 @@ void dance()
   delay(300);
   bow();
   center_servos();
+}
+
+//== IR Control Decoder ====================================================================
+
+RemoteKey get_keypress()
+{
+  if (irReceiver.decode(&irResponse)) // If we have received an IR signal
+  {
+    // Use this debug code to add support for other IR remotes
+    Serial.println("IR code: 0x" + String(irResponse.value, HEX));
+
+    // clear for next input
+    irReceiver.resume();
+
+    switch (irResponse.value)
+    {
+      // enum RemoteKey {NONE,REPEATED,LEFT,RIGHT,UP,DOWN,OK,N0,N1,N2,N3,N4,N5,N6,N7,N8,N9,STAR,HASH,FF,RR,MENU,SETUP};
+
+      // KEYES remote (came w/ bot)
+      case 0xFF629D:
+        return UP;
+      case 0xFFA857:
+        return DOWN;
+      case 0xFFC23D:
+        return RIGHT;
+      case 0xFF22DD:
+        return LEFT;
+      case 0xFF02FD:
+        return OK;
+      case 0xFF6897:
+        return N1;
+      case 0xFF9867:
+        return N2;
+      case 0xFFB04F:
+        return N3;
+      case 0xFF30CF:
+        return N4;
+      case 0xFF18E7:
+        return N5;
+      case 0xFF7A85:
+        return N6;
+      case 0xFF10EF:
+        return N7;
+      case 0xFF38C7:
+        return N8;
+      case 0xFF5AA5:
+        return N9;
+      case 0xFF4AB5:
+        return N0;
+      case 0xFF42BD:
+        return STAR;
+      case 0xFF52AD:
+        return POUND;
+      case 0xFFFFFFFF: // repeat last key
+        return REPEATED;
+      default:
+        return NONE;
+    } // switch
+    
+  } 
+  else
+  {
+    return NONE;
+  }
+
 }
 
 //== Wave ==================================================================================
