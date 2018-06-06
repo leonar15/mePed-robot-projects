@@ -134,7 +134,8 @@ void loop()
   unsigned long lastValue;
   
   center_servos();  // Center all servos
-  high = 15;        // Set hight to 15
+
+  high = 15;        // Set height to 15
   spd = 3;          // Set speed to 3
 
   while (1 == 1)    // Loop forever
