@@ -20,6 +20,14 @@
 #define INCH 0
 #define CM 1
 
+// Speed constants
+#define SPEED_MAX  10 // delay 5ms between movements
+#define SPEED_MIN  1  // delay 50ms between movements
+#define SPEED_STEP 1  // how quickly speed can be changed
+
+// Initial values
+#define INIT_SPEED SPEED_MAX
+
 // calibration
 int da =  -12,  // Left Front Pivot
     db =   10,  // Left Back Pivot
@@ -61,7 +69,7 @@ int f    = 0;
 int b    = 0;
 int l    = 0;
 int r    = 0;
-int spd  = 3;  // Speed of walking motion, larger the number, the slower the speed
+int speed  = INIT_SPEED;  // Speed of walking motion, larger the number, the slower the speed
 int high = 0;   // How high the robot is standing
 
 // Define 8 Servos
@@ -125,8 +133,7 @@ void loop()
   RemoteKey lastKey = NONE;
 
   high = 15;        // Set height to 15
-  spd = 3;          // Set speed to 3
-
+  
   while (1 == 1)    // Loop forever
   {
     thisKey = get_keypress();
@@ -175,7 +182,8 @@ void loop()
           break;
 
         case N3:
-          increase_speed();
+          // increase speed
+          change_speed(SPEED_STEP);
           break;
 
         case N4:
@@ -187,7 +195,8 @@ void loop()
           break;
 
         case N6:
-          decrease_speed();
+          // decrease speed
+          change_speed(-SPEED_STEP);
           break;
 
         case N7:
@@ -524,20 +533,21 @@ void center_servos()
   int s42 = 90; // Front Right Lift Servo
 }
 
-//== Increase Speed ========================================================================
+//== Change Speed ========================================================================
 
-void increase_speed()
+void change_speed(int delta)
 {
-  if (spd > 3)
-    spd--;
-}
+  speed = speed + delta;
 
-//== Decrease Speed ========================================================================
-
-void decrease_speed()
-{
-  if (spd < 50)
-    spd++;
+  // make sure speed stays within limits
+  if (speed > SPEED_MAX)
+  {
+    speed = SPEED_MAX;
+  }
+  else if (speed < SPEED_MIN)
+  {
+    speed = SPEED_MIN;
+  }
 }
 
 //== Srv ===================================================================================
@@ -563,6 +573,10 @@ void srv( int  p11, int p21, int p31, int p41, int p12, int p22, int p32, int p4
   p22 = p22 + high * 3;
   p32 = p32 + high * 3;
   p42 = p42 + high * 3;
+
+  // Higher speed => shorter delay
+  // Lower speed  => longer delay
+  int delayTime = 55 - 5 * speed; // ms
 
   while ((s11 != p11) || (s21 != p21) || (s31 != p31) || (s41 != p41) || (s12 != p12) || (s22 != p22) || (s32 != p32) || (s42 != p42))
   {
@@ -715,7 +729,7 @@ void srv( int  p11, int p21, int p31, int p41, int p12, int p22, int p32, int p4
     myServo6.write(s32);
     myServo8.write(s42);
 
-    delay(spd); // Delay before next movement
+    delay(delayTime); // Delay before next movement
 
   }//while
 } //srv
