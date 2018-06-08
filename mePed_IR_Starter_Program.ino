@@ -127,8 +127,6 @@ void setup()
 
 void loop()
 {
-  unsigned long value;
-  unsigned long lastValue;
   RemoteKey thisKey = NONE;
   RemoteKey lastKey = NONE;
 
