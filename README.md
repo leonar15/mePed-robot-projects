@@ -1,7 +1,7 @@
 # mePed Robot Projects
 
 ## Intro
-This is a repository of projects written for the [mePed v2](https://www.meped.io/mepedv2) Arduino-based robot. Based on the original code provided by the robot's creator, we intend to see what this great little robot can do!
+This is a repository of projects written for the [mePed v2](https://www.meped.io/mepedv2), an Arduino-based quadrupedal robot. Based on the original code provided by the robot's creator, we intend to see what this great little robot can do!
 
 ## How to Use This Code
 1. Buy a mePed robot [from their store](https://www.spiercetech.com/shop/12-robot-kits)
