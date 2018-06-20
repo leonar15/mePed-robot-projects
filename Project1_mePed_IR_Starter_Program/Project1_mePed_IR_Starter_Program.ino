@@ -73,14 +73,14 @@ int speed  = INIT_SPEED;  // Speed of walking motion, larger the number, the slo
 int high = 0;   // How high the robot is standing
 
 // Define 8 Servos
-Servo myServo1; // Front Left Pivot Servo
-Servo myServo2; // Front Left Lift Servo
-Servo myServo3; // Back Left Pivot Servo
-Servo myServo4; // Back Left Lift Servo
-Servo myServo5; // Back Right Pivot Servo
-Servo myServo6; // Back Right Lift Servo
-Servo myServo7; // Front Right Pivot Servo
-Servo myServo8; // Front Right Lift Servo
+Servo servoFLPivot; // Front Left Pivot Servo
+Servo servoFLLift; // Front Left Lift Servo
+Servo servoBLPivot; // Back Left Pivot Servo
+Servo servoBLLift; // Back Left Lift Servo
+Servo servoBRPivot; // Back Right Pivot Servo
+Servo servoBRLift; // Back Right Lift Servo
+Servo servoFRPivot; // Front Right Pivot Servo
+Servo servoFRLift; // Front Right Lift Servo
 
 // Set up IR Sensor
 int irReceiverPin = 12;           // Use pin D12 for IR Sensor
@@ -100,14 +100,14 @@ void setup()
   Serial.begin(9600);
 
   // Attach servos to Arduino Pins
-  myServo1.attach(2);
-  myServo2.attach(3);
-  myServo3.attach(4);
-  myServo4.attach(5);
-  myServo5.attach(6);
-  myServo6.attach(7);
-  myServo7.attach(8);
-  myServo8.attach(9);
+  servoFLPivot.attach(2);
+  servoFLLift.attach(3);
+  servoBLPivot.attach(4);
+  servoBLLift.attach(5);
+  servoBRPivot.attach(6);
+  servoBRLift.attach(7);
+  servoFRPivot.attach(8);
+  servoFRLift.attach(9);
 
   // Set USRF pins
   pinMode(trigPin, OUTPUT);
@@ -330,33 +330,33 @@ RemoteKey get_keypress()
 void wave()
 {
   /*
-  myServo1 - Front Left Pivot Servo
-  myServo2 - Front Left Lift Servo
-  myServo3 - Back Left Pivot Servo
-  myServo4 - Back Left Lift Servo
-  myServo5 - Back Right Pivot Servo
-  myServo6 - Back Right Lift Servo
-  myServo7 - Front Right Pivot Servo
-  myServo8 - Front Right Lift Servo
+  servoFLPivot - Front Left Pivot Servo
+  servoFLLift - Front Left Lift Servo
+  servoBLPivot - Back Left Pivot Servo
+  servoBLLift - Back Left Lift Servo
+  servoBRPivot - Back Right Pivot Servo
+  servoBRLift - Back Right Lift Servo
+  servoFRPivot - Front Right Pivot Servo
+  servoFRLift - Front Right Lift Servo
   */
 
   center_servos();
-  myServo4.write(45);
-  myServo6.write(45);
+  servoBLLift.write(45);
+  servoBRLift.write(45);
   delay(200);
-  myServo8.write(0);
+  servoFRLift.write(0);
   delay(200);
-  myServo7.write(180);
+  servoFRPivot.write(180);
   delay(200);
-  myServo7.write(30);
+  servoFRPivot.write(30);
   delay(300);
-  myServo7.write(180);
+  servoFRPivot.write(180);
   delay(300);
-  myServo7.write(30);
+  servoFRPivot.write(30);
   delay(300);
-  myServo7.write(s41);
+  servoFRPivot.write(s41);
   delay(300);
-  myServo8.write(s42);
+  servoFRLift.write(s42);
   center_servos();
 
 }
@@ -367,11 +367,11 @@ void bow()
 {
   center_servos();
   delay(200);
-  myServo2.write(15);
-  myServo8.write(15);
+  servoFLLift.write(15);
+  servoFRLift.write(15);
   delay(700);
-  myServo2.write(90);
-  myServo8.write(90);
+  servoFLLift.write(90);
+  servoFRLift.write(90);
   delay(700);
 }
 
@@ -379,20 +379,20 @@ void bow()
 
 void lean_left()
 {
-  myServo2.write(15);
-  myServo4.write(15);
-  myServo6.write(150);
-  myServo8.write(150);
+  servoFLLift.write(15);
+  servoBLLift.write(15);
+  servoBRLift.write(150);
+  servoFRLift.write(150);
 }
 
 //== Lean_Right ============================================================================
 
 void lean_right()
 {
-  myServo2.write(150);
-  myServo4.write(150);
-  myServo6.write(15);
-  myServo8.write(15);
+  servoFLLift.write(150);
+  servoBLLift.write(150);
+  servoBRLift.write(15);
+  servoFRLift.write(15);
 }
 
 //== Lean_Left =============================================================================
@@ -512,14 +512,14 @@ void turn_right ()
 
 void center_servos()
 {
-  myServo1.write(90);
-  myServo2.write(90);
-  myServo3.write(90);
-  myServo4.write(90);
-  myServo5.write(90);
-  myServo6.write(90);
-  myServo7.write(90);
-  myServo8.write(90);
+  servoFLPivot.write(90);
+  servoFLLift.write(90);
+  servoBLPivot.write(90);
+  servoBLLift.write(90);
+  servoBRPivot.write(90);
+  servoBRLift.write(90);
+  servoFRPivot.write(90);
+  servoFRLift.write(90);
 
   int s11 = 90; // Front Left Pivot Servo
   int s12 = 90; // Front Left Lift Servo
@@ -716,16 +716,16 @@ void srv( int  p11, int p21, int p31, int p41, int p12, int p22, int p32, int p4
     }
 
     // Write Pivot Servo Values
-    myServo1.write(s11 + da);
-    myServo3.write(s21 + db);
-    myServo5.write(s31 + dc);
-    myServo7.write(s41 + dd);
+    servoFLPivot.write(s11 + da);
+    servoBLPivot.write(s21 + db);
+    servoBRPivot.write(s31 + dc);
+    servoFRPivot.write(s41 + dd);
 
     // Write Lift Servos Values
-    myServo2.write(s12);
-    myServo4.write(s22);
-    myServo6.write(s32);
-    myServo8.write(s42);
+    servoFLLift.write(s12);
+    servoBLLift.write(s22);
+    servoBRLift.write(s32);
+    servoFRLift.write(s42);
 
     delay(delayTime); // Delay before next movement
 
