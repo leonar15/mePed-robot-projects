@@ -629,11 +629,13 @@ void srv( int  p11, int p21, int p31, int p41, int p12, int p22, int p32, int p4
   int s42 = servoFRLift.read();
 
   // Multiply lift servo positions by manual height adjustment
-  p12 = p12 + high * 3;
-  p22 = p22 + high * 3;
-  p32 = p32 + high * 3;
-  p42 = p42 + high * 3;
-
+  /*
+  p12 = p12 + height * 3;
+  p22 = p22 + height * 3;
+  p32 = p32 + height * 3;
+  p42 = p42 + height * 3;
+  */
+  
   // Higher speed => shorter delay
   // Lower speed  => longer delay
   int delayTime = 55 - 5 * speed; // ms
