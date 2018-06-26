@@ -644,140 +644,21 @@ void srv( int  p11, int p21, int p31, int p41, int p12, int p22, int p32, int p4
   {
 
     // Front Left Pivot Servo
-    if (s11 < p11)            // if servo position is less than programmed position
-    {
-      if ((s11 + sp1) <= p11)
-        s11 = s11 + sp1;      // set servo position equal to servo position plus speed constant
-      else
-        s11 = p11;
-    }
-
-    if (s11 > p11)            // if servo position is greater than programmed position
-    {
-      if ((s11 - sp1) >= p11)
-        s11 = s11 - sp1;      // set servo position equal to servo position minus speed constant
-      else
-        s11 = p11;
-    }
-
+    s11 = servo_compute_step(s11, p11, sp1);
     // Back Left Pivot Servo
-    if (s21 < p21)
-    {
-      if ((s21 + sp2) <= p21)
-        s21 = s21 + sp2;
-      else
-        s21 = p21;
-    }
-
-    if (s21 > p21)
-    {
-      if ((s21 - sp2) >= p21)
-        s21 = s21 - sp2;
-      else
-        s21 = p21;
-    }
-
+    s21 = servo_compute_step(s21, p21, sp2);
     // Back Right Pivot Servo
-    if (s31 < p31)
-    {
-      if ((s31 + sp3) <= p31)
-        s31 = s31 + sp3;
-      else
-        s31 = p31;
-    }
-
-    if (s31 > p31)
-    {
-      if ((s31 - sp3) >= p31)
-        s31 = s31 - sp3;
-      else
-        s31 = p31;
-    }
-
+    s31 = servo_compute_step(s31, p31, sp3);
     // Front Right Pivot Servo
-    if (s41 < p41)
-    {
-      if ((s41 + sp4) <= p41)
-        s41 = s41 + sp4;
-      else
-        s41 = p41;
-    }
-
-    if (s41 > p41)
-    {
-      if ((s41 - sp4) >= p41)
-        s41 = s41 - sp4;
-      else
-        s41 = p41;
-    }
-
+    s41 = servo_compute_step(s41, p41, sp4);
     // Front Left Lift Servo
-    if (s12 < p12)
-    {
-      if ((s12 + sp1) <= p12)
-        s12 = s12 + sp1;
-      else
-        s12 = p12;
-    }
-
-    if (s12 > p12)
-    {
-      if ((s12 - sp1) >= p12)
-        s12 = s12 - sp1;
-      else
-        s12 = p12;
-    }
-
+    s12 = servo_compute_step(s12, p12, sp1);
     // Back Left Lift Servo
-    if (s22 < p22)
-    {
-      if ((s22 + sp2) <= p22)
-        s22 = s22 + sp2;
-      else
-        s22 = p22;
-    }
-
-    if (s22 > p22)
-    {
-      if ((s22 - sp2) >= p22)
-        s22 = s22 - sp2;
-      else
-        s22 = p22;
-    }
-
+    s22 = servo_compute_step(s22, p22, sp2);
     // Back Right Lift Servo
-    if (s32 < p32)
-    {
-      if ((s32 + sp3) <= p32)
-        s32 = s32 + sp3;
-      else
-        s32 = p32;
-    }
-
-    if (s32 > p32)
-    {
-      if ((s32 - sp3) >= p32)
-        s32 = s32 - sp3;
-      else
-        s32 = p32;
-    }
-
+    s32 = servo_compute_step(s32, p32, sp3);
     // Front Right Lift Servo
-    if (s42 < p42)
-    {
-      if ((s42 + sp4) <= p42)
-        s42 = s42 + sp4;
-      else
-        s42 = p42;
-    }
-
-    if (s42 > p42)
-    {
-      if ((s42 - sp4) >= p42)
-        s42 = s42 - sp4;
-      else
-        s42 = p42;
-    }
+    s42 = servo_compute_step(s42, p42, sp4);
 
     // Write Pivot Servo Values
     servoFLPivot.write(s11 + da);
@@ -795,6 +676,31 @@ void srv( int  p11, int p21, int p31, int p41, int p12, int p22, int p32, int p4
 
   }//while
 } //srv
+
+// srv helper method to compute next step
+int servo_compute_step(int pos_current, int pos_desired, int step_speed)
+{
+    // if servo position is less than programmed position
+    if (pos_current < pos_desired)            
+    {
+      if ((pos_current + step_speed) <= pos_desired)
+        // set servo position equal to servo position plus speed constant
+        return pos_current + step_speed;
+      else
+        // jump to final position
+        return pos_desired;
+    }
+    // if servo position is greater than programmed position
+    else if (pos_current > pos_desired)            
+    {
+      if ((pos_current - step_speed) >= pos_desired)
+        // set servo position equal to servo position minus speed constant
+        return pos_current - step_speed;
+      else
+        // jump to final position
+        return pos_desired;
+    }
+}
 
 //== USRF Function ========================================================================
 
