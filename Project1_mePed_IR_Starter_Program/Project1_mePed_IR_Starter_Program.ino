@@ -596,7 +596,7 @@ void recalculate_servo_centers()
   
   // find the lift servo center point, dependent on desired height
   // buffer is 25% of range, allowing 75% for movement 
-  servo_lift_center = SERVO_LIFT_MIN + SERVO_LIFT_BUFFER + (int) (SERVO_LIFT_RANGE * 0.75 * (HEIGHT_MAX - height) / HEIGHT_MAX);
+  servo_lift_center = SERVO_LIFT_MIN + SERVO_LIFT_BUFFER + (int) (SERVO_LIFT_RANGE * 0.75 * (height) / HEIGHT_MAX);
 
 }
 
