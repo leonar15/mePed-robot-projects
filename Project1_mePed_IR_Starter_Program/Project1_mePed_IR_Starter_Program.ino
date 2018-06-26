@@ -188,7 +188,7 @@ void loop()
           break;
 
         case N7:
-          // unassigned
+          change_height(-1);
           break;
 
         case N8:
@@ -196,7 +196,7 @@ void loop()
           break;
 
         case N9:
-          // unassigned
+          change_height(1);
           break;
 
         case N0:
@@ -389,7 +389,7 @@ void lean_right()
   servoFRLift.write(servo_lift_up);
 }
 
-//== Lean_Left =============================================================================
+//== Trim Left =============================================================================
 
 void trim_left()
 {
@@ -397,6 +397,9 @@ void trim_left()
   db--; // Left Back Pivot
   dc--; // Right Back Pivot
   dd--; // Right Front Pivot
+
+  recalculate_servo_centers();
+  center_servos();
 }
 
 //== Lean_Right ============================================================================
@@ -407,6 +410,9 @@ void trim_right()
   db++; // Left Back Pivot
   dc++; // Right Back Pivot
   dd++; // Right Front Pivot
+
+  recalculate_servo_centers();
+  center_servos();
 }
 
 //== Forward ===============================================================================
@@ -472,7 +478,7 @@ void back ()
 
 //== Left =================================================================================
 
-void turn_left ()
+void turn_left()
 {
   // set servo positions and speeds needed to turn left one step
   // (LFP,  LBP, RBP,  RFP, LFL, LBL, RBL, RFL, S1, S2, S3, S4)
@@ -488,7 +494,7 @@ void turn_left ()
 
 //== Right ================================================================================
 
-void turn_right ()
+void turn_right()
 {
   // set servo positions and speeds needed to turn right one step
   // (LFP,  LBP, RBP,  RFP, LFL, LBL, RBL, RFL, S1, S2, S3, S4)
