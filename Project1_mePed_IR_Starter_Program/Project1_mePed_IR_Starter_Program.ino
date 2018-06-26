@@ -25,8 +25,14 @@
 #define SPEED_MIN  1  // delay 50ms between movements
 #define SPEED_STEP 1  // how quickly speed can be changed
 
+// Height constants
+#define HEIGHT_MAX    10
+#define HEIGHT_MIN    0
+#define HEIGHT_CENTER 5
+
 // Initial values
-#define INIT_SPEED SPEED_MAX
+#define INIT_SPEED  SPEED_MAX
+#define INIT_HEIGHT HEIGHT_CENTER
 
 // calibration
 int da =  -12,  // Left Front Pivot
@@ -35,42 +41,14 @@ int da =  -12,  // Left Front Pivot
     dd =   12;  // Right Front Pivot
 
 // servo initial positions + calibration
-int a90  = (90  + da),
-    a120 = (120 + da),
-    a150 = (150 + da),
-    a180 = (180 + da);
+int a90, a120, a150, a180;  // Front Left Pivot
+int b0, b30, b60, b90;      // Back Left Pivot
+int c90, c120, c150, c180;  // Back Right Pivot
+int d0, d30, d60, d90;      // Front Right Pivot
 
-int b0   = (0   + db),
-    b30  = (30  + db),
-    b60  = (60  + db),
-    b90  = (90  + db);
-
-int c90  = (90  + dc),
-    c120 = (120 + dc),
-    c150 = (150 + dc),
-    c180 = (180 + dc);
-
-int d0   = (0   + dd),
-    d30  = (30  + dd),
-    d60  = (60  + dd),
-    d90  = (90  + dd);
-
-// start points for servo
-int s11 = 90; // Front Left Pivot Servo
-int s12 = 90; // Front Left Lift Servo
-int s21 = 90; // Back Left Pivot Servo
-int s22 = 90; // Back Left Lift Servo
-int s31 = 90; // Back Right Pivot Servo
-int s32 = 90; // Back Right Lift Servo
-int s41 = 90; // Front Right Pivot Servo
-int s42 = 90; // Front Right Lift Servo
-
-int f    = 0;
-int b    = 0;
-int l    = 0;
-int r    = 0;
+// current speed & height settings
 int speed  = INIT_SPEED;  // Speed of walking motion, larger the number, the slower the speed
-int high = 0;   // How high the robot is standing
+int height = INIT_HEIGHT; // How high the robot is standing
 
 // Define 8 Servos
 Servo servoFLPivot; // Front Left Pivot Servo
@@ -81,6 +59,17 @@ Servo servoBRPivot; // Back Right Pivot Servo
 Servo servoBRLift; // Back Right Lift Servo
 Servo servoFRPivot; // Front Right Pivot Servo
 Servo servoFRLift; // Front Right Lift Servo
+
+// Servo physical limits (change to suit application)
+#define SERVO_LIFT_MAX    130 // max angle of leg lift allowed (shortest height)
+#define SERVO_LIFT_MIN    50  // min angle of leg lift allowed (tallest height)
+#define SERVO_LIFT_RANGE  (SERVO_LIFT_MAX - SERVO_LIFT_MIN)
+#define SERVO_LIFT_BUFFER (int) (SERVO_LIFT_RANGE * 0.125) // angle buffer allows up/down movement
+
+// calibrate lift servo positions
+int servo_lift_up     = SERVO_LIFT_MIN;
+int servo_lift_center = (SERVO_LIFT_MAX + SERVO_LIFT_MIN) / 2;
+int servo_lift_down   = SERVO_LIFT_MAX;
 
 // Set up IR Sensor
 int irReceiverPin = 12;           // Use pin D12 for IR Sensor
@@ -116,6 +105,9 @@ void setup()
   // Enable the IR receiver
   irReceiver.enableIRIn();
 
+  // initialize servo positions
+  recalculate_servo_centers();
+
   // Center all servos
   center_servos();
   
@@ -130,8 +122,6 @@ void loop()
   RemoteKey thisKey = NONE;
   RemoteKey lastKey = NONE;
 
-  high = 15;        // Set height to 15
-  
   while (1 == 1)    // Loop forever
   {
     thisKey = get_keypress();
@@ -341,11 +331,14 @@ void wave()
   */
 
   center_servos();
+  // tilt back
   servoBLLift.write(45);
   servoBRLift.write(45);
   delay(200);
+  // lift leg
   servoFRLift.write(0);
   delay(200);
+  // wave back and forth
   servoFRPivot.write(180);
   delay(200);
   servoFRPivot.write(30);
@@ -356,7 +349,8 @@ void wave()
   delay(300);
   servoFRPivot.write(s41);
   delay(300);
-  servoFRLift.write(s42);
+  // foot down
+  servoFRLift.write(servo_lift_center);
   center_servos();
 
 }
@@ -367,11 +361,11 @@ void bow()
 {
   center_servos();
   delay(200);
-  servoFLLift.write(15);
-  servoFRLift.write(15);
+  servoFLLift.write(servo_lift_up);
+  servoFRLift.write(servo_lift_up);
   delay(700);
-  servoFLLift.write(90);
-  servoFRLift.write(90);
+  servoFLLift.write(servo_lift_center);
+  servoFRLift.write(servo_lift_center);
   delay(700);
 }
 
@@ -379,20 +373,20 @@ void bow()
 
 void lean_left()
 {
-  servoFLLift.write(15);
-  servoBLLift.write(15);
-  servoBRLift.write(150);
-  servoFRLift.write(150);
+  servoFLLift.write(servo_lift_up);
+  servoBLLift.write(servo_lift_up);
+  servoBRLift.write(servo_lift_down);
+  servoFRLift.write(servo_lift_down);
 }
 
 //== Lean_Right ============================================================================
 
 void lean_right()
 {
-  servoFLLift.write(150);
-  servoBLLift.write(150);
-  servoBRLift.write(15);
-  servoFRLift.write(15);
+  servoFLLift.write(servo_lift_down);
+  servoBLLift.write(servo_lift_down);
+  servoBRLift.write(servo_lift_up);
+  servoFRLift.write(servo_lift_up);
 }
 
 //== Lean_Left =============================================================================
@@ -512,23 +506,14 @@ void turn_right ()
 
 void center_servos()
 {
-  servoFLPivot.write(90);
-  servoFLLift.write(90);
-  servoBLPivot.write(90);
-  servoBLLift.write(90);
-  servoBRPivot.write(90);
-  servoBRLift.write(90);
-  servoFRPivot.write(90);
-  servoFRLift.write(90);
-
-  int s11 = 90; // Front Left Pivot Servo
-  int s12 = 90; // Front Left Lift Servo
-  int s21 = 90; // Back Left Pivot Servo
-  int s22 = 90; // Back Left Lift Servo
-  int s31 = 90; // Back Right Pivot Servo
-  int s32 = 90; // Back Right Lift Servo
-  int s41 = 90; // Front Right Pivot Servo
-  int s42 = 90; // Front Right Lift Servo
+  servoFLPivot.write(a90);
+  servoFLLift.write(servo_lift_center);
+  servoBLPivot.write(b90);
+  servoBLLift.write(servo_lift_center);
+  servoBRPivot.write(c90);
+  servoBRLift.write(servo_lift_center);
+  servoFRPivot.write(d90);
+  servoFRLift.write(servo_lift_center);
 }
 
 //== Change Speed ========================================================================
@@ -548,6 +533,61 @@ void change_speed(int delta)
   }
 }
 
+//== Change Height ========================================================================
+
+void change_height(int delta)
+{
+  height = height + delta;
+
+  // make sure speed stays within limits
+  if (height > HEIGHT_MAX)
+  {
+    height = HEIGHT_MAX;
+  }
+  else if (height < HEIGHT_MIN)
+  {
+    height = HEIGHT_MIN;
+  }
+  
+  recalculate_servo_centers();
+  center_servos();
+}
+
+
+//== Recalculate Servo Center =================================================================
+
+void recalculate_servo_centers()
+{
+    // Left Front Pivot
+  a90 = (90 + da),
+  a120 = (120 + da),
+  a150 = (150 + da),
+  a180 = (180 + da);
+
+  // Left Back Pivot
+  b0 = (0 + db),
+  b30 = (30 + db),
+  b60 = (60 + db),
+  b90 = (90 + db);
+
+  // Right Back Pivot
+  c90 = (90 + dc),
+  c120 = (120 + dc),
+  c150 = (150 + dc),
+  c180 = (180 + dc);
+
+  // Right Front Pivot
+  d0 = (0 + dd),
+  d30 = (30 + dd),
+  d60 = (60 + dd),
+  d90 = (90 + dd);
+  
+  // find the lift servo center point, dependent on desired height
+  // buffer is 25% of range, allowing 75% for movement 
+  servo_lift_center = SERVO_LIFT_MIN + SERVO_LIFT_BUFFER + (int) (SERVO_LIFT_RANGE * 0.75 * (HEIGHT_MAX - height) / HEIGHT_MAX);
+
+}
+
 //== Srv ===================================================================================
 
 void srv( int  p11, int p21, int p31, int p41, int p12, int p22, int p32, int p42, int sp1, int sp2, int sp3, int sp4)
@@ -565,6 +605,16 @@ void srv( int  p11, int p21, int p31, int p41, int p12, int p22, int p32, int p4
   // sp2: Speed 2
   // sp3: Speed 3
   // sp4: Speed 4
+ 
+  // find current servo positions
+  int s11 = servoFLPivot.read();
+  int s12 = servoFLLift.read();
+  int s21 = servoBLPivot.read();
+  int s22 = servoBLLift.read();
+  int s31 = servoBRPivot.read();
+  int s32 = servoBRLift.read();
+  int s41 = servoFRPivot.read();
+  int s42 = servoFRLift.read();
 
   // Multiply lift servo positions by manual height adjustment
   p12 = p12 + high * 3;
