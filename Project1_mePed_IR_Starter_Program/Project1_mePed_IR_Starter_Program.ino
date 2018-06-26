@@ -41,6 +41,11 @@ int da =  -12,  // Left Front Pivot
     dd =   12;  // Right Front Pivot
 
 // servo initial positions + calibration
+int servo_flp_center = 90 + da,
+    servo_blp_center = 90 + db,
+    servo_brp_center = 90 + dc,
+    servo_frp_center = 90 + dd;
+    
 int a90, a120, a150, a180;  // Front Left Pivot
 int b0, b30, b60, b90;      // Back Left Pivot
 int c90, c120, c150, c180;  // Back Right Pivot
@@ -347,7 +352,8 @@ void wave()
   delay(300);
   servoFRPivot.write(30);
   delay(300);
-  servoFRPivot.write(s41);
+  // back to center
+  servoFRPivot.write(servo_frp_center);
   delay(300);
   // foot down
   servoFRLift.write(servo_lift_center);
