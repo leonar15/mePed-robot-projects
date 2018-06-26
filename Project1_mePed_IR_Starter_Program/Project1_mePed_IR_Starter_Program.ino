@@ -110,7 +110,7 @@ void setup()
   // Enable the IR receiver
   irReceiver.enableIRIn();
 
-  // initialize servo positions
+  // Initialize servo offsets
   recalculate_servo_centers();
 
   // Center all servos
@@ -341,7 +341,7 @@ void wave()
   servoBRLift.write(45);
   delay(200);
   // lift leg
-  servoFRLift.write(0);
+  servoFRLift.write(servo_lift_up);
   delay(200);
   // wave back and forth
   servoFRPivot.write(180);
@@ -551,7 +551,7 @@ void change_height(int delta)
 {
   height = height + delta;
 
-  // make sure speed stays within limits
+  // make sure height stays within limits
   if (height > HEIGHT_MAX)
   {
     height = HEIGHT_MAX;
